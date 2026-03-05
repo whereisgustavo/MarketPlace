@@ -29,9 +29,15 @@ class Processador:
         self.loja = Loja()
         
         self.HANDLERS = {
+            # categorias
             "CRIA_CATEGORIA": self._cmd_cria_categoria,
             "LISTA_CATEGORIAS": self._cmd_lista_categorias,
             "REMOVE_CATEGORIA": self._cmd_remove_categoria,
+            # produtos
+            "CRIA_PRODUTO": self._cmd_cria_produto,
+            "LISTA_PRODUTOS": self._cmd_lista_produtos,
+            "AUMENTA_STOCK_PRODUTO": self._cmd_aumenta_stock_produto,
+            "ATUALIZA_PRECO_PRODUTO": self._cmd_atualiza_preco_produto,
             "EXIT": self._cmd_sai_aplicacao
             #TODO: restantes comandos
         }
@@ -95,3 +101,35 @@ class Processador:
         nome_categoria = args[0]
         self.loja.remover_categoria(nome_categoria)
         return f"Categoria {nome_categoria} removida com sucesso."
+    
+    def _cmd_cria_produto(self, args):
+        self._validar_n_args(args, 4)
+        nome_produto = args[0]
+        nome_categoria = args[1]
+        preco = args[2]
+        quantidade = args[3]
+
+        produto = self.loja.criar_produto(nome_produto, nome_categoria, preco, quantidade)
+        return f"Produto {produto.nome} criado com sucesso."
+    
+    def _cmd_lista_produtos(self, args):
+        self._validar_n_args(args, 0)
+        return self.loja.listar_produtos()
+
+    def _cmd_aumenta_stock_produto(self, args):
+        self._validar_n_args(args, 2)
+
+        nome_produto = args[0]
+        delta_quantidade = args[1]
+
+        return self.loja.aumentar_stock_produto(nome_produto, delta_quantidade)
+    
+    def _cmd_atualiza_preco_produto(self, args):
+        self._validar_n_args(args, 2)
+
+        nome_produto = args[0]
+        novo_preco = args[1]
+
+        return self.loja.atualizar_preco(nome_produto, novo_preco)
+
+   
