@@ -86,3 +86,10 @@ class ExcepcaoSupermercadoQuantidadeInvalida(ExcepcaoSupermercado):
 
     def __init__(self):
         super().__init__(f"A quantidade é inválida. ")
+
+# CLIENTE
+# adicionado
+class ExcepcaoSupermercadoEmailJaExistente(ExcepcaoSupermercado):
+
+    def __init__(self, email):
+        super().__init__(f"O email {email} já existe. ")

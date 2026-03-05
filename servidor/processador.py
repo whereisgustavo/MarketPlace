@@ -38,6 +38,9 @@ class Processador:
             "LISTA_PRODUTOS": self._cmd_lista_produtos,
             "AUMENTA_STOCK_PRODUTO": self._cmd_aumenta_stock_produto,
             "ATUALIZA_PRECO_PRODUTO": self._cmd_atualiza_preco_produto,
+            # clientes
+            "CRIA_CLIENTE": self._cmd_cria_cliente,
+            "LISTA_CLIENTES": self._cmd_lista_clientes,
             "EXIT": self._cmd_sai_aplicacao
             #TODO: restantes comandos
         }
@@ -131,5 +134,19 @@ class Processador:
         novo_preco = args[1]
 
         return self.loja.atualizar_preco(nome_produto, novo_preco)
+    
+    def _cmd_cria_cliente(self, args):
+        self._validar_n_args(args, 3)
+
+        nome_cliente = args[0]
+        email = args[1]
+        password = args[2]
+
+        cliente = self.loja.criar_cliente(nome_cliente, email, password)
+        return f"Cliente criado com sucesso com identificador unico {cliente.id}."
+    
+    def _cmd_lista_clientes(self, args):
+        self._validar_n_args(args, 0)
+        return self.loja.listar_clientes()
 
    

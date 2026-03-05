@@ -1,13 +1,15 @@
 from shared.utilities import normalizar_nome
+from servidor.categoria import Categoria
 from servidor.excepcoes import ExcepcaoSupermercadoCategoriaJaExistente
 from servidor.excepcoes import ExcepcaoSupermercadoCategoriaNaoExistente
 from servidor.excepcoes import ExcepcaoSupermercadoCategoriaTemProduto
-from servidor.categoria import Categoria
 from servidor.produto import Produto
 from servidor.excepcoes import ExcepcaoSupermercadoProdutoJaExistente
 from servidor.excepcoes import ExcepcaoSupermercadoProdutoNaoExistente
 from servidor.excepcoes import ExcepcaoSupermercadoPrecoInvalido
 from servidor.excepcoes import ExcepcaoSupermercadoQuantidadeInvalida
+from servidor.cliente import Cliente
+from servidor.excepcoes import ExcepcaoSupermercadoEmailJaExistente
 
 
 class Loja:
@@ -19,10 +21,12 @@ class Loja:
         # ainda n há produtos, mas para usar o REMOVE_CATEGORIA temos de saber se há produtos
         # fica vazio, conta 0   
         self._produtos = {}
+        self._clientes = {}
 
     def reset(): 
         Categoria._contador_global = 1
         Produto._contador_global = 1
+        Cliente._contador_global = 1
         # TODO: MUITO IMPORTANTE Completar esta funcao para Testes Unitários puderem executar sem problemas
 
     # -----------------------------
@@ -194,4 +198,37 @@ class Loja:
         preco_str = f"{produto.preco:.2f}"
         
         return f"O preço do produto {produto.nome} foi atualizado para {preco_str} com sucesso."
+    
+    # -----------------------------
+    # Clientes
+    # -----------------------------
+
+    # adicionado
+    def criar_cliente(self, nome_cliente, email, password):
+        nome_cliente_normalizado = normalizar_nome(nome_cliente)
+        
+        email = email.strip()
+        email_normalizado = email.lower()
+
+        for c in self._clientes.values():
+            if c.email.lower() == email_normalizado:
+                raise ExcepcaoSupermercadoEmailJaExistente(email)
+        
+        cliente = Cliente(nome_cliente_normalizado, email_normalizado, password)
+        self._clientes[cliente.id] = cliente
+        return cliente
+    
+    # adicionado
+    def listar_clientes(self):
+        if len(self._clientes) == 0:
+            return "Sem Clientes."
+        
+        linhas = []
+        linhas.append(f"Total Clientes: {len(self._clientes)}")
+        for id_cliente in sorted(self._clientes.keys()):
+            c = self._clientes[id_cliente]
+            linhas.append(f"{c.id} - {c.nome} ({c.email})")
+        
+        return "\n".join(linhas)
+
     
