@@ -50,3 +50,15 @@ class ExcepcaoSupermercadoCategoriaJaExistente(ExcepcaoSupermercado):
     def __init__(self, nome_categoria):
         super().__init__(f"A categoria {nome_categoria} já existe. ")
 
+# adicionado 
+class ExcepcaoSupermercadoCategoriaNaoExistente(ExcepcaoSupermercado):
+
+    def __init__(self, nome_categoria):
+        super().__init__(f"A categoria {nome_categoria} não existe. ")
+
+# adicionado
+class ExcepcaoSupermercadoCategoriaTemProduto(ExcepcaoSupermercado):
+    def __init__(self, nome_categoria):
+        super().__init__(f"A categoria {nome_categoria} tem produtos associados. ")
+
+

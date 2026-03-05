@@ -30,6 +30,8 @@ class Processador:
         
         self.HANDLERS = {
             "CRIA_CATEGORIA": self._cmd_cria_categoria,
+            "LISTA_CATEGORIAS": self._cmd_lista_categorias,
+            "REMOVE_CATEGORIA": self._cmd_remove_categoria,
             "EXIT": self._cmd_sai_aplicacao
             #TODO: restantes comandos
         }
@@ -83,3 +85,13 @@ class Processador:
             return f"OK; {resultado}"
         except (ExcepcaoSupermercado, ExcepcaoComandoInvalido) as e:
             return f"NOK; {e}"
+        
+    def _cmd_lista_categorias(self, args):
+        self._validar_n_args(args, 0)
+        return self.loja.listar_categorias()
+    
+    def _cmd_remove_categoria(self, args):
+        self._validar_n_args(args, 1)
+        nome_categoria = args[0]
+        self.loja.remover_categoria(nome_categoria)
+        return f"Categoria {nome_categoria} removida com sucesso."
