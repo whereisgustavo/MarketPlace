@@ -22,16 +22,6 @@ def main():
     servidor = TCPSocketServidor(ponto_acesso)
     #TODO: chamar funcoes de rede do servidor ...
     #TODO: apagar e substituir código abaixo por código de sockets
-
-    print("SERVIDOR> A aguardar implementação de:")
-    print("SERVIDOR>  - Criação do socket")
-    print("SERVIDOR>  - Bind ao endereço")
-    print("SERVIDOR>  - Colocação em modo listen")
-    print("SERVIDOR>  - Aceitação de ligação de cliente")
-    print("SERVIDOR>  - Tratamento de exceções")
-    print("SERVIDOR>  - A função processar_comando() deve ser desenvolvida.")
-    print("SERVIDOR> NÃO remover a chamada a processar_comando() — é obrigatória para a correção automática.")
-    print("SERVIDOR> NÃO alterar path para processar_comando() — é obrigatório para a correção automática.")
     
     while True: 
         print("SERVIDOR> Servidor pronto para receber comandos simulado. ")
@@ -44,11 +34,12 @@ def main():
         """
         # GS 03/03
         servidor.aceitar_ligacao()
-        comando = servidor.receber_comando()
-        if comando:
+        while True:
+            comando = servidor.receber_comando()
+            if not comando or comando == 'EXIT':
+                break
             resposta = processador.processar_comando(comando)
             servidor.enviar_resposta(resposta)
-        servidor.fechar_ligacao()
 
 if __name__ == "__main__":
     main()

@@ -89,7 +89,27 @@ class ExcepcaoSupermercadoQuantidadeInvalida(ExcepcaoSupermercado):
 
 # CLIENTE
 # adicionado
+class ExcepcaoSupermercadoProdutoNaoExistente(ExcepcaoSupermercado):
+
+    def __init__(self):
+        super().__init__(f"Produto não encontrado no carrinho")
+
 class ExcepcaoSupermercadoEmailJaExistente(ExcepcaoSupermercado):
 
     def __init__(self, email):
         super().__init__(f"O email {email} já existe. ")
+
+class ExcepcaoSupermercadoClienteNaoExistente(ExcepcaoSupermercado):
+
+    def __init__(self):
+        super().__init__(f"O cliente não existe. ")
+
+class ExcepcaoSupermercadoClienteJaExistente(ExcepcaoSupermercado):
+
+    def __init__(self):
+        super().__init__(f"O cliente já existe. ")
+
+class ExcepcaoSupermercadoCarrinhoVazio(ExcepcaoSupermercado):
+
+    def __init__(self):
+        super().__init__(f"Carrinho vazio.")

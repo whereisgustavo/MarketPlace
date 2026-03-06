@@ -41,6 +41,13 @@ class Processador:
             # clientes
             "CRIA_CLIENTE": self._cmd_cria_cliente,
             "LISTA_CLIENTES": self._cmd_lista_clientes,
+            # carrinho
+            "ADICIONA_PRODUTO_CARRINHO": self._cmd_adiciona_carrinho,
+            "CHECKOUT_CARRINHO": self._cmd_checkout,
+            "REMOVE_PRODUTO_CARRINHO": self._cmd_remove_carrinho,
+            "LISTA_CARRINHO": self._cmd_lista_carrinho,
+            # encomenda
+            "LISTA_ENCOMENDAS": self._cmd_lista_encomendas,
             "EXIT": self._cmd_sai_aplicacao
             #TODO: restantes comandos
         }
@@ -149,4 +156,31 @@ class Processador:
         self._validar_n_args(args, 0)
         return self.loja.listar_clientes()
 
+    def _cmd_checkout(self, args):
+        self._validar_n_args(args, 1)
+        return self.loja.checkout_carrinho(int(args[0]))
+
+    def _cmd_lista_encomendas(self, args):
+        self._validar_n_args(args, 0)
+        return self.loja.listar_encomendas()
+    
+    def _cmd_adiciona_carrinho(self, args):
+        self._validar_n_args(args, 3)
+        return self.loja.adiciona_produto_carrinho(int(args[0]), args[1], int(args[2]))
+
+    def _cmd_checkout(self, args):
+        self._validar_n_args(args, 1)
+        return self.loja.checkout_carrinho(int(args[0]))
+
+    def _cmd_remove_carrinho(self, args):
+        self._validar_n_args(args, 2)
+        return self.loja.remover_produto_carrinho(int(args[0]), args[1])
+
+    def _cmd_lista_carrinho(self, args):
+        self._validar_n_args(args, 1)
+        return self.loja.listar_carrinho(int(args[0]))
+    
+    def _cmd_lista_encomendas(self, args):
+        self._validar_n_args(args, 1)
+        return self.loja.listar_encomendas_cliente(int(args[0]))
    
