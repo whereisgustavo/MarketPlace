@@ -1,6 +1,6 @@
 from shared.utilities import normalizar_nome
 from servidor.categoria import Categoria
-from servidor.excepcoes import ExcepcaoSupermercadoCategoriaJaExistente
+from servidor.excepcoes import ExcepcaoSupermercadoCategoriaJaExistente, ExcepcaoSupermercadoProdutoNaoExistenteNoCarrinho
 from servidor.excepcoes import ExcepcaoSupermercadoCategoriaNaoExistente
 from servidor.excepcoes import ExcepcaoSupermercadoCategoriaTemProduto
 from servidor.produto import Produto
@@ -61,7 +61,7 @@ class Loja:
     # adicionado
     def listar_categorias(self):
         if len(self._categorias) == 0:
-            return "Sem Categorias."
+            return "Sem Categorias"
         
         # total de produtos, nº total de produtos que estão registados
         prod_total = len(self._produtos)
@@ -74,7 +74,7 @@ class Loja:
         for id_categoria in sorted(self._categorias.keys()):
             categoria = self._categorias[id_categoria]
             n_prod_categoria = self._numero_produtos_categoria(id_categoria)
-            linhas.append(f"{categoria.id} - {categoria.nome} ({n_prod_categoria} produtos)")
+            linhas.append(f"{categoria.id} - {categoria.nome} ({n_prod_categoria} produtos);")
 
         return "\n".join(linhas)
     
@@ -131,7 +131,7 @@ class Loja:
             quantidade = int(quantidade)
         except (ValueError, TypeError):
             raise ExcepcaoSupermercadoQuantidadeInvalida()
-        if quantidade < 0:
+        if quantidade <= 0:
             raise ExcepcaoSupermercadoQuantidadeInvalida()
         
         produto = Produto(nome_produto_normalizado, id_categoria, nome_categoria_normalizado, preco, quantidade)
@@ -172,7 +172,7 @@ class Loja:
             delta_quantidade = int(delta_quantidade)
         except (ValueError, TypeError):
             raise ExcepcaoSupermercadoQuantidadeInvalida()
-        if delta_quantidade < 0:
+        if delta_quantidade <= 0:
             raise ExcepcaoSupermercadoQuantidadeInvalida()
         
         produto = self._produtos[id_produto]
@@ -224,13 +224,13 @@ class Loja:
     # adicionado
     def listar_clientes(self):
         if len(self._clientes) == 0:
-            return "Sem Clientes."
+            return "Sem Clientes"
         
         linhas = []
         linhas.append(f"Total Clientes: {len(self._clientes)}")
         for id_cliente in sorted(self._clientes.keys()):
             c = self._clientes[id_cliente]
-            linhas.append(f"{c.id} - {c.nome} ({c.email})")
+            linhas.append(f"{c.id} - {c.nome} ({c.email});")
         
         return "\n".join(linhas)
     
@@ -247,8 +247,15 @@ class Loja:
             raise ExcepcaoSupermercadoProdutoNaoExistente(nome_produto)
         
         produto = self._produtos[id_produto]
-        quantidade = int(quantidade)
 
+        try:
+            quantidade = int(quantidade)
+        except (ValueError, TypeError):
+            raise ExcepcaoSupermercadoQuantidadeInvalida()
+
+        if quantidade <= 0:
+            raise ExcepcaoSupermercadoQuantidadeInvalida()
+        
         if produto.quantidade < quantidade:
             raise ExcepcaoSupermercadoQuantidadeInvalida()
         
@@ -266,7 +273,7 @@ class Loja:
 
         id_produto = self.obter_produto_id(nome_produto)
         if id_produto is None or id_produto not in self._carrinhos.get(id_cliente, {}):
-            raise ExcepcaoSupermercadoProdutoNaoExistente
+            raise ExcepcaoSupermercadoProdutoNaoExistenteNoCarrinho()
 
         # Devolver stock
         qtd_no_carrinho = self._carrinhos[id_cliente][id_produto]
@@ -292,9 +299,9 @@ class Loja:
             subtotal = prod.preco * qtd
             valor_total += subtotal
             
-            linhas.append(f"{prod.id} - {prod.nome} ({qtd} unidades, {prod.preco:.2f} euros/un, subtotal {subtotal:.2f} euros);")
+            linhas.append(f"{id_prod} - {prod.nome} ({prod.id_categoria}-{prod.nome_categoria}, {prod.preco:.2f} euros, {qtd} unidades);")
 
-        resultado = [f"Carrinho do Cliente {id_cliente}:", f"Total Carrinho: {valor_total:.2f} euros\n"]
+        resultado = [f"Total Produtos: {len(carrinho)}\n" f"Total Quantidade: {sum(carrinho.values())}\n" f"Total Preço: {valor_total:.2f} euros\n"]
         resultado.extend(linhas)
         
         return "\n".join(resultado)
@@ -322,11 +329,11 @@ class Loja:
         self._encomendas[nova_encomenda.id] = nova_encomenda
         self._carrinhos[id_cliente] = {}
         
-        return f"Encomenda {nova_encomenda.id} criada com sucesso."
+        return f"Checkout de carrinho de compras efetuado com sucesso. Encomenda criada com sucesso a partir do carrinho."
     
     def listar_encomendas_cliente(self, id_cliente):
         if id_cliente not in self._clientes:
-            raise ExcepcaoSupermercadoClienteJaExistente
+            raise ExcepcaoSupermercadoClienteNaoExistente
 
         encomendas_do_cliente = []
         for enc in self._encomendas.values():

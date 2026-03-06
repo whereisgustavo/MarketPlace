@@ -150,7 +150,7 @@ class Processador:
         password = args[2]
 
         cliente = self.loja.criar_cliente(nome_cliente, email, password)
-        return f"Cliente criado com sucesso com identificador unico {cliente.id}."
+        return f"Cliente criado com sucesso com identificador único {cliente.id}."
     
     def _cmd_lista_clientes(self, args):
         self._validar_n_args(args, 0)
