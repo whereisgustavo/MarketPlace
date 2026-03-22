@@ -1,3 +1,21 @@
+"""
+AD - Aplicações Distribuídas
+Ano Letivo 2025/2026
+Projeto - Fase 2
+
+Grupo: 39
+
+Elementos do Grupo:
+- Diogo Silva (64143)
+- Gustavo Santos (64167)
+
+Descrição:
+Define a classe Produto, que representa um produto disponível na loja,
+incluindo nome, categoria, preço e quantidade em stock.
+"""
+
+
+
 class Produto:
     _contador_global = 1
 

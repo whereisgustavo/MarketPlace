@@ -1,3 +1,21 @@
+"""
+AD - Aplicações Distribuídas
+Ano Letivo 2025/2026
+Projeto - Fase 2
+
+Grupo: 39
+
+Elementos do Grupo:
+- Diogo Silva (64143)
+- Gustavo Santos (64167)
+
+Descrição:
+Ficheiro principal do cliente. Responsável por iniciar a aplicação do lado
+do cliente, estabelecer ligação com o servidor e enviar comandos introduzidos
+pelo utilizador, recebendo e apresentando as respostas devolvidas pelo servidor.
+"""
+
+
 from sys import argv
 import sys
 from  shared.socket_utilities import PontoAcesso

@@ -1,3 +1,21 @@
+"""
+AD - Aplicações Distribuídas
+Ano Letivo 2025/2026
+Projeto - Fase 2
+
+Grupo: 39
+
+Elementos do Grupo:
+- Diogo Silva (64143)
+- Gustavo Santos (64167)
+
+Descrição:
+Implementa a camada de comunicação do servidor utilizando sockets TCP.
+Responsável por aceitar ligações de clientes, receber comandos e enviar
+respostas processadas pelo servidor.
+"""
+
+
 import socket
 from shared.socket_utilities import PontoAcesso
 from servidor.processador import Processador

@@ -1,3 +1,21 @@
+"""
+AD - Aplicações Distribuídas
+Ano Letivo 2025/2026
+Projeto - Fase 2
+
+Grupo: 39
+
+Elementos do Grupo:
+- Diogo Silva (64143)
+- Gustavo Santos (64167)
+
+Descrição:
+Implementa a lógica de negócio do sistema MarketPlace, incluindo a gestão
+de categorias, produtos, clientes, carrinhos de compras e encomendas.
+"""
+
+
+
 from shared.utilities import normalizar_nome
 from servidor.categoria import Categoria
 from servidor.excepcoes import ExcepcaoSupermercadoCategoriaJaExistente, ExcepcaoSupermercadoProdutoNaoExistenteNoCarrinho
@@ -346,19 +364,26 @@ class Loja:
         cliente = self._clientes[id_cliente]
         total_gasto = sum(enc.valor_total for enc in encomendas_do_cliente)
         
+        produtos_distintos = set()
         for enc in encomendas_do_cliente:
-            pass 
+            produtos_distintos.update(enc.produtos.keys())
 
         linhas = []
         linhas.append(f"Cliente: {cliente.nome} {cliente.email}")
         linhas.append(f"Total Encomendas: {len(encomendas_do_cliente)}")
+        linhas.append(f"Total Produtos: {len(produtos_distintos)}")
         linhas.append(f"Total Preço: {total_gasto:.2f} euros")
+        linhas.append(f"Categorias Top: {encomendas_do_cliente[0].categoria_top}")
         linhas.append("-" * 30)
 
         for enc in sorted(encomendas_do_cliente, key=lambda x: x.id):
+
+            total_quantidade = sum(enc.produtos.values())
+
             linhas.append(f"ID Encomenda: {enc.id}")
-            linhas.append(f"Data Encomenda: {enc.data_hora}")
-            linhas.append(f"Valor Total: {enc.valor_total:.2f} euros")
+            linhas.append(f"Total Produtos: {len(enc.produtos)}")
+            linhas.append(f"Total Quantidade: {total_quantidade}")
+            linhas.append(f"Total Preço: {enc.valor_total:.2f} euros")
             
             for p_id, qtd in sorted(enc.produtos.items()):
                 p = self._produtos[p_id]

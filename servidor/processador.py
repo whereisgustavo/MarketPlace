@@ -1,3 +1,21 @@
+"""
+AD - Aplicações Distribuídas
+Ano Letivo 2025/2026
+Projeto - Fase 2
+
+Grupo: 39
+
+Elementos do Grupo:
+- Diogo Silva (64143)
+- Gustavo Santos (64167)
+
+Descrição:
+Implementa a classe Processador responsável por interpretar os comandos
+recebidos do cliente, validar os argumentos e invocar a lógica de negócio
+na classe Loja. Todas as respostas seguem o protocolo definido (OK; ou NOK;).
+"""
+
+
 from servidor.excepcoes import ExcepcaoComandoInvalido
 from servidor.excepcoes import ExcepcaoComandoDesconhecido
 from servidor.excepcoes import ExcepcaoComandoNumeroArgumentosIncorreto

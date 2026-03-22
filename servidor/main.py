@@ -1,3 +1,21 @@
+"""
+AD - Aplicações Distribuídas
+Ano Letivo 2025/2026
+Projeto - Fase 2
+
+Grupo: 39
+
+Elementos do Grupo:
+- Diogo Silva (64143)
+- Gustavo Santos (64167)
+
+Descrição:
+Ficheiro principal do servidor. Responsável por iniciar o servidor TCP,
+aceitar ligações de clientes e encaminhar os comandos recebidos para o
+processador de comandos.
+"""
+
+
 import sys
 from servidor.processador import Processador
 from servidor.rede import TCPSocketServidor

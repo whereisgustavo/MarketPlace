@@ -158,4 +158,7 @@ para evitar problemas com imports entre módulos.
 
 Autores
 
+Diogo Silva
+Gustavo Santos
+
 Projeto desenvolvido no âmbito da unidade curricular Aplicações Distribuídas.

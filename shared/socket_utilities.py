@@ -1,3 +1,18 @@
+"""
+AD - Aplicações Distribuídas
+Ano Letivo 2025/2026
+Projeto - Fase 2
+
+Grupo: 39
+
+Elementos do Grupo:
+- Diogo Silva (64143)
+- Gustavo Santos (64167)
+
+Descrição:
+Contém a classe PontoAcesso responsável por validar e representar um endereço IP e porto.
+"""
+
 import ipaddress
 import socket #GS - 03/03/2026
 

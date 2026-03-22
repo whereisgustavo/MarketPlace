@@ -1,3 +1,20 @@
+"""
+AD - Aplicações Distribuídas
+Ano Letivo 2025/2026
+Projeto - Fase 2
+
+Grupo: 39
+
+Elementos do Grupo:
+- Diogo Silva (64143)
+- Gustavo Santos (64167)
+
+Descrição:
+Define todas as exceções utilizadas no sistema, incluindo exceções de
+comandos inválidos, validações e regras de negócio do supermercado.
+"""
+
+
 # -----------------------------------
 #   Excepções de Comando inválido
 # -----------------------------------
