@@ -10,47 +10,62 @@ Elementos do Grupo:
 - Gustavo Santos (64167)
 
 Descrição:
-Ficheiro principal do cliente. Responsável por iniciar a aplicação do lado
-do cliente, estabelecer ligação com o servidor e enviar comandos introduzidos
-pelo utilizador, recebendo e apresentando as respostas devolvidas pelo servidor.
+Ponto de entrada do cliente. Segue o padrão do professor (PL03 - SELECT):
+  - Processador criado fora do loop (ligação persistente)
+  - processa(msg) no loop
+  - close() no fim
+
+Uso:
+    python -m cliente.main <porto> <id_perfil> <id_utilizador>
 """
 
-
-from sys import argv
 import sys
-from  shared.socket_utilities import PontoAcesso
+from cliente.processador import Processador
 from shared.excepcoes import ExcepcaoConfiguracaoInvalida
-from cliente.rede import TCPSocketCliente
+
+HOST = 'localhost'
+PORT = 5000
+PERFIL = 0
+ID_UTILIZADOR = 0
+
 
 def main():
-    if len(argv) != 2:
-        print("CLIENTE> Uso: python -m cliente.main <porto>")
+    global PORT, PERFIL, ID_UTILIZADOR
+
+    if len(sys.argv) != 4:
+        print("Uso: python -m cliente.main <porto> <id_perfil> <id_utilizador>")
         sys.exit(1)
 
-    try: 
-        # valida endereco_ip e porto (se erro ExcepcaoIPInvalido ou ExcepcaoPortoInvalido)
-        ponto_acesso = PontoAcesso(endereco_ip = 'localhost', porto = argv[1])
-        print("CLIENTE> Configuracao do servidor válida. ")
-        print("CLIENTE> Iniciando aplicação do lado do cliente. ")
-    except ExcepcaoConfiguracaoInvalida  as e: 
-        print("CLIENTE>", e)
-        sys.exit(1) 
+    try:
+        PORT = int(sys.argv[1])
+        PERFIL = int(sys.argv[2])
+        ID_UTILIZADOR = int(sys.argv[3])
+    except ValueError:
+        print("porto, id_perfil e id_utilizador devem ser inteiros.")
+        sys.exit(1)
 
-    # TODO: chama funcoes no cliente para contactar o servidor e enviar mensagens
-    cliente = TCPSocketCliente(ponto_acesso)
-    cliente.conectar()
+    try:
+        processador = Processador(HOST, PORT, PERFIL, ID_UTILIZADOR)
+    except ExcepcaoConfiguracaoInvalida as e:
+        print(e)
+        sys.exit(1)
+
+    print(f"[INFO] Ligado ao servidor. Perfil: {PERFIL} | Utilizador: {ID_UTILIZADOR}")
+
     while True:
-        comando = input("CLIENTE> ") # 1. Lê o que o utilizador quer
-        
-        if comando.upper() == "EXIT":
+        try:
+            msg = input('Mensagem: ')
+        except (EOFError, KeyboardInterrupt):
             break
-            
-        cliente.enviar_mensagem(comando)      # 2. Envia (Função A)
-        resposta = cliente.receber_mensagem() # 3. Recebe (Função B)
-        
-        print(resposta) # 4. Mostra o resultado (OK; ou NOK;)
 
-    cliente.fechar_ligacao()
+        if msg.strip().upper() == 'EXIT':
+            break
+
+        resposta = processador.processa(msg)
+        if resposta is not None:
+            print('Recebi: %s' % resposta)
+
+    processador.close()
 
 
 if __name__ == "__main__":

@@ -11,7 +11,7 @@ Elementos do Grupo:
 
 Descrição:
 Define todas as exceções utilizadas no sistema, incluindo exceções de
-comandos inválidos, validações e regras de negócio do supermercado.
+comandos invalidos, validações e regras de negocio do supermercado.
 """
 
 
@@ -125,6 +125,11 @@ class ExcepcaoSupermercadoClienteJaExistente(ExcepcaoSupermercado):
 
     def __init__(self):
         super().__init__(f"O cliente já existe. ")
+
+class ExcepcaoSupermercadoStockInsuficiente(ExcepcaoSupermercado):
+
+    def __init__(self):
+        super().__init__(f"Stock insuficiente. ")
 
 class ExcepcaoSupermercadoCarrinhoVazio(ExcepcaoSupermercado):
 

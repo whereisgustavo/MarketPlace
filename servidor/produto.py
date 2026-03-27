@@ -10,22 +10,35 @@ Elementos do Grupo:
 - Gustavo Santos (64167)
 
 Descrição:
-Define a classe Produto, que representa um produto disponível na loja,
-incluindo nome, categoria, preço e quantidade em stock.
+Define a classe Produto. Cada produto pertence a uma categoria e tem
+nome, preço e quantidade em stock. O ID é atribuido automaticamente.
 """
 
 
-
 class Produto:
+
+    # Contador de classe: atribui IDs unicos e sequenciais a cada produto
     _contador_global = 1
 
     def __init__(self, nome, id_categoria, nome_categoria, preco, quantidade):
-        self.id = Produto._contador_global
+        # ID unico deste produto 
+        self.id_produto = Produto._contador_global
         Produto._contador_global += 1
 
+        # Nome normalizado do produto (Title Case)
         self.nome = nome
-        self.id_categoria = id_categoria
-        self.nome_categoria = nome_categoria
 
-        self.preco = round(preco, 2) # preco com 2 casas decimais
+        # ID numerico da categoria a que este produto pertence
+        self.id_categoria = id_categoria
+
+        # Nome da categoria (saved para facilitar a formatação de output
+        # sem ter de fazer lookup à Loja)
+        self.categoria = nome_categoria
+
+        # Preço arredondado a 2 casas decimais
+        self.preco = round(preco, 2)
+
+        # Quantidade atual em stock
+        # (é decrementada quando um produto é adicionado ao carrinho
+        #  e restaurada quando é removido)
         self.quantidade = quantidade

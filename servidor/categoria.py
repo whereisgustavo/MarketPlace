@@ -10,17 +10,25 @@ Elementos do Grupo:
 - Gustavo Santos (64167)
 
 Descrição:
-Define a classe Categoria, responsável por representar uma categoria de
-produtos no sistema.
+Define a classe Categoria. Cada categoria agrupa um conjunto de produtos
+na loja (ex: "Fruta", "Laticínios"). O ID é atribuído automaticamente
+pelo contador de classe e nunca é reutilizado.
 """
 
+
 class Categoria:
+
+    # Contador de classe: partilhado por todas as instâncias.
+    # Começa em 1 e incrementa a cada nova categoria criada.
+    # Nunca é decrementado, mesmo que uma categoria seja removida.
     _contador_global = 1
 
     def __init__(self, nome):
-        self.id = Categoria._contador_global
-        self.nome = nome
-        Categoria._contador_global += 1
+        # Atribui o próximo ID disponivel a esta categoria
+        self.id_categoria = Categoria._contador_global
 
-    def obter_id(self): 
-        return self.id
+        # Nome normalizado (Title Case, sem espaços redundantes)
+        self.nome = nome
+
+        # Avança o contador para a proxima categoria
+        Categoria._contador_global += 1

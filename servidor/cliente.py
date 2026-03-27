@@ -10,21 +10,28 @@ Elementos do Grupo:
 - Gustavo Santos (64167)
 
 Descrição:
-Define a classe Encomenda, que representa uma encomenda realizada por um
-cliente após o checkout do carrinho de compras.
+Define a classe Cliente. Representa um utilizador registado no sistema.
+O ID é atribuido automaticamente. O email é guardado em minusculas para
+garantir comparações case-insensitive. A password é guardada em texto
+limpo.
 """
 
 
+class Cliente:
 
-# Criação da class Encomenda - GS 06/03
-class Encomenda:
+    # Contador de classe: garante IDs unicos e sequenciais para clientes
     _contador_global = 1
 
-    def __init__(self, id_cliente, produtos_carrinho, valor_total, data_hora, categoria_top):
-        self.id = Encomenda._contador_global
-        Encomenda._contador_global += 1
-        self.id_cliente = id_cliente
-        self.produtos = produtos_carrinho 
-        self.valor_total = valor_total
-        self.data_hora = data_hora
-        self.categoria_top = categoria_top
+    def __init__(self, nome, email, password):
+        # ID único deste cliente
+        self.id_cliente = Cliente._contador_global
+        Cliente._contador_global += 1
+
+        # Nome normalizado (Title Case, sem espaços redundantes)
+        self.nome = nome
+
+        # Email em minúsculas (normalizado para comparações unicas)
+        self.email = email
+
+        # Password em texto limpo (sem hash nesta fase do projeto)
+        self.password = password
