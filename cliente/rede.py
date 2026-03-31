@@ -10,7 +10,7 @@ Elementos do Grupo:
 - Gustavo Santos (64167)
 
 Descrição:
-Camada de transporte do CLIENTE
+Camada de transporte do Cliente
 
 Responsabilidades:
   - Criar o socket TCP e ligar ao servidor
@@ -21,7 +21,7 @@ Responsabilidades:
 A ligação é persistente: é estabelecida uma vez no arranque e mantida
 durante toda a sessão.
 
-Não interpreta respostas — apenas move bytes.
+Não interpreta respostas, apenas move bytes.
 """
 
 import socket
@@ -69,7 +69,7 @@ class TCPSocketCliente:
           3. receive_all(tamanho) -> le o payload completo
           4. pickle.loads -> converte bytes -> lista
 
-        Devolve a lista [op_code_resposta, [dados]], ou None se a
+        Devolve a lista [op_code_resposta, dados], ou None se a
         ligação foi fechada pelo servidor."""
 
         # Passo 1: le os 4 bytes do cabeçalho

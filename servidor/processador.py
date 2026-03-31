@@ -10,8 +10,8 @@ Elementos do Grupo:
 - Gustavo Santos (64167)
 
 Descrição:
-Camada de interpretação de comandos em protocolo TEXTO (Fase 1).
-Usada directamente pelos testes unitários (testes.py).
+Camada de interpretação de comandos em protocolo TEXTO.
+Usada diretamente pelos testes unitários.
 """
 
 import shlex
@@ -79,7 +79,7 @@ class Processador:
 
     def _validar_n_args(self, args, n):
         """Verifica que foram fornecidos n argumentos.
-        Lança excepção com o número esperado e o recebido."""
+        Lança excepção com o numero esperado e o recebido."""
         if len(args) != n:
             raise ExcepcaoComandoNumeroArgumentosIncorreto(n, len(args))
 
@@ -109,7 +109,7 @@ class Processador:
             return f"NOK; {e}"
 
     # ------------------------------------------------------------------
-    # Handlers — Categorias
+    # Handlers - Categorias
     # ------------------------------------------------------------------
 
     def _cmd_cria_categoria(self, args):
@@ -136,7 +136,7 @@ class Processador:
         return f"Categoria {categoria.nome} removida com sucesso."
 
     # ------------------------------------------------------------------
-    # Handlers — Produtos
+    # Handlers - Produtos
     # ------------------------------------------------------------------
 
     def _cmd_cria_produto(self, args):
@@ -171,7 +171,7 @@ class Processador:
         return f"O preço do produto {produto.nome} foi atualizado para {produto.preco:.2f} com sucesso."
 
     # ------------------------------------------------------------------
-    # Handlers — Clientes
+    # Handlers - Clientes
     # ------------------------------------------------------------------
 
     def _cmd_cria_cliente(self, args):
@@ -190,11 +190,11 @@ class Processador:
         return "\n".join(linhas)
 
     # ------------------------------------------------------------------
-    # Handlers — Carrinho (protocolo texto: id_cliente é arg explicito)
+    # Handlers - Carrinho (id_cliente é arg explicito)
     # ------------------------------------------------------------------
 
     def _cmd_adiciona_carrinho(self, args):
-        # No protocolo texto (Fase 1/testes) o id_cliente vem no comando
+        # No protocolo texto o id_cliente vem no comando
         self._validar_n_args(args, 3)
         produto = self.loja.adiciona_produto_carrinho(int(args[0]), args[1], int(args[2]))
         return f"Produto {produto.nome} adicionado com sucesso ao carrinho."
@@ -229,7 +229,7 @@ class Processador:
                 "Encomenda criada com sucesso a partir do carrinho.")
 
     # ------------------------------------------------------------------
-    # Handlers — Encomendas
+    # Handlers - Encomendas
     # ------------------------------------------------------------------
 
     def _cmd_lista_encomendas(self, args):

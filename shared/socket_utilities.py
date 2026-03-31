@@ -10,7 +10,7 @@ Elementos do Grupo:
 - Gustavo Santos (64167)
 
 Descrição:
-Utilitários partilhados de rede:
+Utilitarios partilhados de rede:
   - receive_all : garante a leitura completa de N bytes (suporte a mensagens fragmentadas)
   - PontoAcesso : valida e guarda o endereço IP e porto do servidor
 """
@@ -22,44 +22,34 @@ from shared.excepcoes import ExcepcaoIPInvalido
 from shared.excepcoes import ExcepcaoPortoInvalido
 
 
-# -----------------------------------------------------------------------
-# receive_all
-# -----------------------------------------------------------------------
 # O TCP não garante que sock.recv(n) devolve exatamente n bytes de uma vez.
-# A mensagem pode chegar em vários fragmentos (ex: 100 bytes chegam como
-# 60 + 40). Esta função chama recv() repetidamente até acumular todos os
+# A mensagem pode chegar em vários fragmentos. 
+# Esta função chama recv() repetidamente até acumular todos os
 # bytes pedidos, só retornando quando a mensagem está completa.
-#
 # Parâmetros:
-#   sock -- socket TCP ligado
-#   n    -- número exacto de bytes a ler
+#   sock: socket TCP ligado
+#   n: número exacto de bytes a ler
 #
 # Devolve:
-#   bytes com exactamente n bytes, ou None se a ligação foi fechada
-# -----------------------------------------------------------------------
+#   bytes com exatamente n bytes, ou None se a ligação foi fechada
 def receive_all(sock, n):
     dados = b''                         # acumulador de bytes recebidos
     while len(dados) < n:
         # pede apenas os bytes que ainda faltam
         parte = sock.recv(n - len(dados))
         if not parte:
-            # recv devolveu b'' → o outro lado fechou a ligação
+            # recv devolveu b'' -> o outro lado fechou a ligação
             return None
         dados += parte
     return dados
 
 
-# -----------------------------------------------------------------------
-# PontoAcesso
-# -----------------------------------------------------------------------
-# Representa e valida o par (IP, porto) usado para ligar cliente→servidor.
-# Lançada ExcepcaoIPInvalido ou ExcepcaoPortoInvalido se os valores forem
-# inválidos.
-# -----------------------------------------------------------------------
+# Representa e valida o par (IP, porto) usado para ligar o cliente ao servidor.
+# Lançada ExcepcaoIPInvalido ou ExcepcaoPortoInvalido se os valores forem invalidos.
 class PontoAcesso:
 
     def __init__(self, endereco_ip, porto):
-        # Valida primeiro; só guarda se ambos forem válidos
+        # Valida primeiro, so guarda se ambos forem validos
         self._validar_endereco_ip(endereco_ip)
         self._validar_porto(porto)
         self.endereco_ip = endereco_ip
@@ -76,7 +66,7 @@ class PontoAcesso:
             raise ExcepcaoPortoInvalido(porto)
 
     def _validar_endereco_ip(self, endereco_ip):
-        # Aceita "localhost" directamente; para tudo o resto tenta fazer parse
+        # Aceita "localhost" directamente, para o resto tenta fazer parse
         # como endereço IPv4 ou IPv6
         try:
             if 'localhost' != endereco_ip:

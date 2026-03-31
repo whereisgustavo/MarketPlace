@@ -12,28 +12,28 @@ Elementos do Grupo:
 Descrição:
 Stub do cliente, proxy RPC fino.
 
-Cada método serializa o pedido [op_code, args, id_perfil, id_utilizador],
-envia pela rede e devolve a resposta bruta [op_code_resp, [dados]].
+Cada metodo serializa o pedido [op_code, args, id_perfil, id_utilizador],
+envia pela rede e devolve a resposta bruta [op_code_resp, dados].
 Não formata texto, essa responsabilidade é do ProcessadorCliente.
 """
 
 from shared.excepcoes_shared import OpCodes
 
 # op_codes (série 1xxxx)
-OP_CRIA_CATEGORIA    = OpCodes.CRIA_CATEGORIA
-OP_LISTA_CATEGORIAS  = OpCodes.LISTA_CATEGORIAS
-OP_REMOVE_CATEGORIA  = OpCodes.REMOVE_CATEGORIA
-OP_CRIA_PRODUTO      = OpCodes.CRIA_PRODUTO
-OP_LISTA_PRODUTOS    = OpCodes.LISTA_PRODUTOS
-OP_AUMENTA_STOCK     = OpCodes.AUMENTA_STOCK
-OP_ATUALIZA_PRECO    = OpCodes.ATUALIZA_PRECO
-OP_CRIA_CLIENTE      = OpCodes.CRIA_CLIENTE
-OP_LISTA_CLIENTES    = OpCodes.LISTA_CLIENTES
+OP_CRIA_CATEGORIA = OpCodes.CRIA_CATEGORIA
+OP_LISTA_CATEGORIAS = OpCodes.LISTA_CATEGORIAS
+OP_REMOVE_CATEGORIA = OpCodes.REMOVE_CATEGORIA
+OP_CRIA_PRODUTO = OpCodes.CRIA_PRODUTO
+OP_LISTA_PRODUTOS = OpCodes.LISTA_PRODUTOS
+OP_AUMENTA_STOCK = OpCodes.AUMENTA_STOCK
+OP_ATUALIZA_PRECO = OpCodes.ATUALIZA_PRECO
+OP_CRIA_CLIENTE = OpCodes.CRIA_CLIENTE
+OP_LISTA_CLIENTES = OpCodes.LISTA_CLIENTES
 OP_ADICIONA_CARRINHO = OpCodes.ADICIONA_PRODUTO_CARRINHO
-OP_REMOVE_CARRINHO   = OpCodes.REMOVE_PRODUTO_CARRINHO
-OP_LISTA_CARRINHO    = OpCodes.LISTA_CARRINHO
-OP_CHECKOUT          = OpCodes.CHECKOUT_CARRINHO
-OP_LISTA_ENCOMENDAS  = OpCodes.LISTA_ENCOMENDAS
+OP_REMOVE_CARRINHO = OpCodes.REMOVE_PRODUTO_CARRINHO
+OP_LISTA_CARRINHO = OpCodes.LISTA_CARRINHO
+OP_CHECKOUT = OpCodes.CHECKOUT_CARRINHO
+OP_LISTA_ENCOMENDAS = OpCodes.LISTA_ENCOMENDAS
 
 
 class Stub:

@@ -10,10 +10,14 @@ Elementos do Grupo:
 - Gustavo Santos (64167)
 
 Descrição:
-Define a classe Produto. Cada produto pertence a uma categoria e tem
-nome, preço e quantidade em stock. O ID é atribuido automaticamente.
-"""
+Define a classe Produto. 
+Cada produto pertence a uma categoria e tem:
+    - nome
+    - preço
+    - quantidade em stock
 
+O ID é atribuido automaticamente.
+"""
 
 class Produto:
 
@@ -39,6 +43,6 @@ class Produto:
         self.preco = round(preco, 2)
 
         # Quantidade atual em stock
-        # (é decrementada quando um produto é adicionado ao carrinho
-        #  e restaurada quando é removido)
+        # Decrementada quando um produto é adicionado ao carrinho
+        # e restaurada quando é removido
         self.quantidade = quantidade

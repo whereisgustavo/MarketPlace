@@ -10,11 +10,11 @@ Elementos do Grupo:
 - Gustavo Santos (64167)
 
 Descrição:
-Define a classe Encomenda. Uma encomenda é criada quando um cliente
-faz checkout do carrinho. Guarda o estado dos produtos no momento da
-compra (preço e quantidade) para não ser afectada por alterações futuras.
+Define a classe Encomenda. 
+Uma encomenda é criada quando um cliente faz checkout do carrinho. 
+Guarda o estado dos produtos no momento da compra (preço e quantidade) 
+para não ser afetada por alterações futuras.
 """
-
 
 class Encomenda:
 
@@ -29,7 +29,7 @@ class Encomenda:
         # ID do cliente que fez a encomenda
         self.id_cliente = id_cliente
 
-        # Dicionario {id_produto: quantidade} — snapshot do carrinho no monento do checkout
+        # Dicionario {id_produto: quantidade}
         # As quantidades guardadas são as que foram compradas.
         self.produtos = produtos_carrinho
 

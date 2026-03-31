@@ -20,7 +20,7 @@ Padrão:
 Internamente:
   1. Gere a ligação TCP (via TCPSocketCliente)
   2. Cria o Stub (proxy RPC)
-  3. processa(msg) — parse da string -> routing -> chamada ao Stub -> formatação
+  3. processa(msg) - parse da string -> routing -> chamada ao Stub -> formatação
 """
 
 import shlex

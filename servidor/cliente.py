@@ -10,10 +10,9 @@ Elementos do Grupo:
 - Gustavo Santos (64167)
 
 Descrição:
-Define a classe Cliente. Representa um utilizador registado no sistema.
-O ID é atribuido automaticamente. O email é guardado em minusculas para
-garantir comparações case-insensitive. A password é guardada em texto
-limpo.
+Define a classe Cliente. 
+Representa um utilizador registado no sistema.
+O ID é atribuido automaticamente. 
 """
 
 
@@ -23,15 +22,15 @@ class Cliente:
     _contador_global = 1
 
     def __init__(self, nome, email, password):
-        # ID único deste cliente
+        # ID unico deste cliente
         self.id_cliente = Cliente._contador_global
         Cliente._contador_global += 1
 
-        # Nome normalizado (Title Case, sem espaços redundantes)
+        # Nome normalizado (Title Case, sem espaços)
         self.nome = nome
 
-        # Email em minúsculas (normalizado para comparações unicas)
+        # Email em minusculas (normalizado para comparações unicas)
         self.email = email
 
-        # Password em texto limpo (sem hash nesta fase do projeto)
+        # Password em texto limpo
         self.password = password

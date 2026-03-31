@@ -41,18 +41,16 @@ from servidor.excepcoes import ExcepcaoSupermercadoQuantidadeInvalida
 from servidor.excepcoes import ExcepcaoSupermercadoStockInsuficiente
 from servidor.excepcoes import ExcepcaoSupermercadoCarrinhoVazio
 
-# ------------------------------------------------------------------
+
 # Códigos de perfil (quem está a fazer o pedido)
-# ------------------------------------------------------------------
 CLIENTE_ANONIMO = 0
 CLIENTE_REGISTADO = 1
 FUNCIONARIO = 2
 ADMINISTRADOR = 3
 
-# ------------------------------------------------------------------
+
 # Atalhos locais para OpCodes (de shared.excepcoes_shared)
 # Pedidos (1xxxx)
-# ------------------------------------------------------------------
 OP_CRIA_CATEGORIA = OpCodes.CRIA_CATEGORIA
 OP_LISTA_CATEGORIAS = OpCodes.LISTA_CATEGORIAS
 OP_REMOVE_CATEGORIA = OpCodes.REMOVE_CATEGORIA
@@ -67,6 +65,7 @@ OP_REMOVE_CARRINHO = OpCodes.REMOVE_PRODUTO_CARRINHO
 OP_LISTA_CARRINHO = OpCodes.LISTA_CARRINHO
 OP_CHECKOUT = OpCodes.CHECKOUT_CARRINHO
 OP_LISTA_ENCOMENDAS = OpCodes.LISTA_ENCOMENDAS
+
 
 # Sucesso (2xxxx)
 OK_CRIA_CATEGORIA = OpCodes.OK_CRIA_CATEGORIA
@@ -84,6 +83,7 @@ OK_LISTA_CARRINHO = OpCodes.OK_LISTA_CARRINHO
 OK_CHECKOUT = OpCodes.OK_CHECKOUT
 OK_LISTA_ENCOMENDAS = OpCodes.OK_LISTA_ENCOMENDAS
 
+
 # Erros genericos (39xxx)
 ERR_GENERICO = OpCodes.ERRO_GENERICO
 ERR_OP_INVALIDO = OpCodes.OP_CODE_INVALIDO
@@ -98,9 +98,8 @@ ERR_TIPO_ARG = OpCodes.TIPO_ARGUMENTO_INVALIDO
 ERR_OPERACAO_NAO_AUTORIZADA = OpCodes.OPERACAO_NAO_AUTORIZADA
 ERR_INTERNO = OpCodes.ERRO_INTERNO_SERVIDOR
 
-# ------------------------------------------------------------------
+
 # Permissões: para cada op_code, lista dos perfis autorizados
-# ------------------------------------------------------------------
 PERMISSOES = {
     OP_CRIA_CATEGORIA: [ADMINISTRADOR],
     OP_LISTA_CATEGORIAS: [CLIENTE_ANONIMO, CLIENTE_REGISTADO, FUNCIONARIO, ADMINISTRADOR],
@@ -118,31 +117,28 @@ PERMISSOES = {
     OP_LISTA_ENCOMENDAS: [CLIENTE_REGISTADO, FUNCIONARIO, ADMINISTRADOR],
 }
 
-# ------------------------------------------------------------------
+
 # Numero de argumentos esperados por operação
-# (em Fase 2 o id_cliente não vem nos args do carrinho
-# vem em id_utilizador no cabeçalho do pedido)
-# ------------------------------------------------------------------
 N_ARGS = {
-    OP_CRIA_CATEGORIA: 1,    # [nome]
-    OP_LISTA_CATEGORIAS: 0,  # []
-    OP_REMOVE_CATEGORIA: 1,  # [nome]
-    OP_CRIA_PRODUTO: 4,      # [nome, categoria, preco, quantidade]
-    OP_LISTA_PRODUTOS: 0,    # []
-    OP_AUMENTA_STOCK: 2,     # [nome, delta]
-    OP_ATUALIZA_PRECO: 2,    # [nome, novo_preco]
-    OP_CRIA_CLIENTE: 3,      # [nome, email, password]
-    OP_LISTA_CLIENTES: 0,    # []
+    OP_CRIA_CATEGORIA: 1, # [nome]
+    OP_LISTA_CATEGORIAS: 0, # []
+    OP_REMOVE_CATEGORIA: 1, # [nome]
+    OP_CRIA_PRODUTO: 4, # [nome, categoria, preco, quantidade]
+    OP_LISTA_PRODUTOS: 0, # []
+    OP_AUMENTA_STOCK: 2, # [nome, delta]
+    OP_ATUALIZA_PRECO: 2, # [nome, novo_preco]
+    OP_CRIA_CLIENTE: 3, # [nome, email, password]
+    OP_LISTA_CLIENTES: 0, # []
     OP_ADICIONA_CARRINHO: 2, # [nome_produto, quantidade]
-    OP_REMOVE_CARRINHO: 1,   # [nome_produto]
-    OP_LISTA_CARRINHO: 0,    # []
-    OP_CHECKOUT: 0,          # []
-    OP_LISTA_ENCOMENDAS: 1,  # [id_cliente]
+    OP_REMOVE_CARRINHO: 1, # [nome_produto]
+    OP_LISTA_CARRINHO: 0, # []
+    OP_CHECKOUT: 0, # []
+    OP_LISTA_ENCOMENDAS: 1, # [id_cliente]
 }
 
 
 def _erro(code, msg=""):
-    """Constroi uma resposta de erro no formato padrão [code, [mensagem]]."""
+    """Constroi uma resposta de erro no formato padrão [code, mensagem]."""
     return [code, [msg]]
 
 
@@ -158,8 +154,9 @@ class Skeleton:
         Recebe um pedido já desserializado (lista),
         valida a estrutura, verifica perfil e envia para o handler.
 
-        Devolve sempre [op_code_resposta, [dados]] para ser serializado
+        Devolve sempre [op_code_resposta, dados] para ser serializado
         e enviado ao cliente."""
+
 
         # Validações de estrutura
 
@@ -325,7 +322,7 @@ class Skeleton:
             return _erro(30901, str(e))
 
     def _adiciona_carrinho(self, args, id_utilizador):
-        # Na Fase 2 o id_cliente é o id_utilizador da sessão (não vem nos args)
+        # id_cliente é o id_utilizador da sessão (não vem nos args)
         try:
             produto = self.loja.adiciona_produto_carrinho(id_utilizador, args[0], args[1])
             return [OK_ADICIONA_CARRINHO, [produto]]

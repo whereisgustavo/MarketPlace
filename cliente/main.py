@@ -10,7 +10,7 @@ Elementos do Grupo:
 - Gustavo Santos (64167)
 
 Descrição:
-Ponto de entrada do cliente. Segue o padrão do professor (PL03 - SELECT):
+Ponto de entrada do cliente:
   - Processador criado fora do loop (ligação persistente)
   - processa(msg) no loop
   - close() no fim

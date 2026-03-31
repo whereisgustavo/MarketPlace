@@ -10,8 +10,13 @@ Elementos do Grupo:
 - Gustavo Santos (64167)
 
 Descrição:
-Camada de logica de negócio do MarketPlace. A classe Loja é o coração
-do sistema: gere categorias, produtos, clientes, carrinhos e encomendas.
+Camada de logica de negócio do MarketPlace. 
+A classe Loja é o coração do sistema, gere: 
+    - categorias 
+    - produtos
+    - clientes 
+    - carrinhos
+    - encomendas
 Não sabe nada de rede, só recebe dados Python e devolve objectos Python.
 """
 
@@ -39,17 +44,17 @@ from datetime import datetime
 class Loja:
 
     def __init__(self):
-        # Dicionarios que funcionam como base de dados em memória.
+        # Dicionarios que funcionam como base de dados em memoria.
         # Chave = ID, Valor = objeto correspondente.
-        self._categorias = {}   # {id_categoria: Categoria}
-        self._produtos = {}     # {id_produto:   Produto}
-        self._clientes = {}     # {id_cliente:   Cliente}
-        self._carrinhos = {}    # {id_cliente:   {id_produto: quantidade}}
-        self._encomendas = {}   # {id_encomenda: Encomenda}
+        self._categorias = {} # {id_categoria: Categoria}
+        self._produtos = {} # {id_produto: Produto}
+        self._clientes = {} # {id_cliente: Cliente}
+        self._carrinhos = {} # {id_cliente: {id_produto: quantidade}}
+        self._encomendas = {} # {id_encomenda: Encomenda}
 
     def reset(self):
         """Limpa todo o estado da loja e reinicia os contadores.
-        Usado pelos testes unitários para garantir isolamento entre testes."""
+        Usado pelos testes unitarios para garantir isolamento entre testes."""
         # Repõe os contadores de ID de todas as classes de dominio
         Categoria._contador_global = 1
         Produto._contador_global = 1
@@ -62,9 +67,9 @@ class Loja:
         self._carrinhos = {}
         self._encomendas = {}
 
-    # ==========================================================
+    # ----------------------------------------------------------
     # CATEGORIAS
-    # ==========================================================
+    # ----------------------------------------------------------
 
     def criar_categoria(self, nome):
         """Cria e regista uma nova categoria.
@@ -122,9 +127,9 @@ class Loja:
         del self._categorias[id_categoria]
         return categoria
 
-    # ==========================================================
+    # ----------------------------------------------------------
     # PRODUTOS
-    # ==========================================================
+    # ----------------------------------------------------------
 
     def obter_produto_id(self, nome_produto):
         """Procura um produto pelo nome normalizado.
@@ -214,9 +219,9 @@ class Loja:
         produto.preco = round(novo_preco, 2)
         return produto
 
-    # ==========================================================
+    # ----------------------------------------------------------
     # CLIENTES
-    # ==========================================================
+    # ----------------------------------------------------------
 
     def criar_cliente(self, nome_cliente, email, password):
         """Regista um novo cliente. O email tem de ser unico no sistema
@@ -244,9 +249,9 @@ class Loja:
         """Devolve o objeto Cliente com o ID dado, ou None se não existir."""
         return self._clientes.get(id_cliente, None)
 
-    # ==========================================================
+    # ----------------------------------------------------------
     # CARRINHO
-    # ==========================================================
+    # ----------------------------------------------------------
 
     def adiciona_produto_carrinho(self, id_cliente, nome_produto, quantidade):
         """Adiciona um produto ao carrinho de um cliente.
@@ -408,11 +413,9 @@ class Loja:
         """Lista todas as encomendas de um cliente.
 
         Devolve um triplo (cliente, encomendas, prods_por_encomenda) onde:
-        - cliente             : objeto Cliente
-        - encomendas          : lista de Encomenda ordenada por ID
-        - prods_por_encomenda : lista de listas; cada sub-lista contem
-                                snapshots de Produto com a quantidade comprada
-                                (não a quantidade atual em stock)
+        - cliente : objeto Cliente
+        - encomendas : lista de Encomenda ordenada por ID
+        - prods_por_encomenda : lista de listas
 
         Se não houver encomendas, devolve (cliente, [], [])."""
         if id_cliente not in self._clientes:

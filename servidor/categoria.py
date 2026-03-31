@@ -10,15 +10,14 @@ Elementos do Grupo:
 - Gustavo Santos (64167)
 
 Descrição:
-Define a classe Categoria. Cada categoria agrupa um conjunto de produtos
-na loja (ex: "Fruta", "Laticínios"). O ID é atribuído automaticamente
-pelo contador de classe e nunca é reutilizado.
+Define a classe Categoria. 
+Cada categoria agrupa um conjunto de produtos na loja. 
+O ID é atribuído automaticamente pelo contador de classe e nunca é reutilizado.
 """
-
 
 class Categoria:
 
-    # Contador de classe: partilhado por todas as instâncias.
+    # Contador de classe: partilhado.
     # Começa em 1 e incrementa a cada nova categoria criada.
     # Nunca é decrementado, mesmo que uma categoria seja removida.
     _contador_global = 1
