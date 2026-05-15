@@ -443,3 +443,29 @@ class Loja:
             prods_por_encomenda.append(prods)
 
         return (self._clientes[id_cliente], encomendas_ordenadas, prods_por_encomenda)
+
+    def exportar_estado(self):
+        """Serializa o estado completo da loja para transferência para um novo servidor da cadeia."""
+        return {
+            'categorias':        copy.deepcopy(self._categorias),
+            'produtos':          copy.deepcopy(self._produtos),
+            'clientes':          copy.deepcopy(self._clientes),
+            'carrinhos':         copy.deepcopy(self._carrinhos),
+            'encomendas':        copy.deepcopy(self._encomendas),
+            'cnt_categoria':     Categoria._contador_global,
+            'cnt_produto':       Produto._contador_global,
+            'cnt_cliente':       Cliente._contador_global,
+            'cnt_encomenda':     Encomenda._contador_global,
+        }
+
+    def importar_estado(self, estado):
+        """Carrega o estado recebido do servidor antecessor na cadeia."""
+        self._categorias  = estado['categorias']
+        self._produtos    = estado['produtos']
+        self._clientes    = estado['clientes']
+        self._carrinhos   = estado['carrinhos']
+        self._encomendas  = estado['encomendas']
+        Categoria._contador_global  = estado['cnt_categoria']
+        Produto._contador_global    = estado['cnt_produto']
+        Cliente._contador_global    = estado['cnt_cliente']
+        Encomenda._contador_global  = estado['cnt_encomenda']

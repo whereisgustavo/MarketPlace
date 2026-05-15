@@ -30,8 +30,9 @@ from shared.socket_utilities import receive_all
 
 class TCPSocketServidor:
 
-    def __init__(self, ponto_acesso):
+    def __init__(self, ponto_acesso, ssl_context=None):
         self.ponto_acesso = ponto_acesso
+        self.ssl_context = ssl_context
 
         # Cria o socket TCP (AF_INET = IPv4, SOCK_STREAM = TCP)
         self.sock_servidor = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -52,11 +53,12 @@ class TCPSocketServidor:
         return self.sock_servidor
 
     def aceitar_cliente(self):
-        """Aceita uma nova ligação e devolve o socket da conexão.
-        Chamado quando select() indica atividade no socket servidor."""
+        """Aceita uma nova ligação. Se houver contexto SSL, envolve o socket com TLS."""
         conn_sock, (addr, port) = self.sock_servidor.accept()
+        if self.ssl_context:
+            conn_sock = self.ssl_context.wrap_socket(conn_sock, server_side=True)
         print(f"SERVIDOR> Nova ligação de {addr}:{port}")
-        return conn_sock  # socket dedicado a este cliente
+        return conn_sock
 
     def receber_pedido(self, conn_sock):
         """Recebe um pedido serializado de um cliente.

@@ -1,7 +1,7 @@
 """
 AD - Aplicações Distribuídas
 Ano Letivo 2025/2026
-Projeto - Fase 2
+Projeto - Fase 3
 
 Grupo: 39
 
@@ -10,24 +10,43 @@ Elementos do Grupo:
 - Gustavo Santos (64167)
 
 Descrição:
-Processador do cliente.
+Processador do cliente - Fase 3.
 
-Padrão:
-  processador = Processador(HOST, PORT, PERFIL, ID_UTILIZADOR)
+Novidades em relação à Fase 2:
+  - Liga ao ZooKeeper para descobrir o head e tail da cadeia
+  - Mantém duas ligações SSL: uma ao head (escritas) e outra ao tail (leituras)
+  - Watch no ZooKeeper para atualizar as ligações quando a cadeia muda
+  - Operações de escrita → stub_head; operações de leitura → stub_tail
+
+Padrão de uso (igual à Fase 2 da perspetiva do main.py):
+  processador = Processador(ZK_ADDR, PERFIL, ID_UTILIZADOR)
   resposta = processador.processa(msg)
   processador.close()
-
-Internamente:
-  1. Gere a ligação TCP (via TCPSocketCliente)
-  2. Cria o Stub (proxy RPC)
-  3. processa(msg) - parse da string -> routing -> chamada ao Stub -> formatação
 """
 
 import shlex
+import threading
+
+from kazoo.client import KazooClient
+
 from shared.socket_utilities import PontoAcesso
 from shared.utilities import normalizar_nome
+from shared.zookeeper_utils import (
+    CHAIN_PATH, ordenar_nos,
+    obter_head, obter_tail, parse_endereco
+)
+from shared.ssl_utils import criar_contexto_cliente as criar_ssl_context_cliente
 from cliente.rede import TCPSocketCliente
 from cliente.stub import Stub
+
+
+# Comandos que modificam o estado — enviados para o HEAD da cadeia
+CMDS_ESCRITA = {
+    'CRIA_CATEGORIA', 'REMOVE_CATEGORIA',
+    'CRIA_PRODUTO', 'AUMENTA_STOCK_PRODUTO', 'ATUALIZA_PRECO_PRODUTO',
+    'CRIA_CLIENTE',
+    'ADICIONA_PRODUTO_CARRINHO', 'REMOVE_PRODUTO_CARRINHO', 'CHECKOUT_CARRINHO',
+}
 
 
 def _e_sucesso(op_code):
@@ -41,12 +60,104 @@ def _nok(dados):
 
 class Processador:
 
-    def __init__(self, host, porto, id_perfil, id_utilizador):
-        """Liga ao servidor e cria o Stub para esta sessão."""
-        ponto_acesso = PontoAcesso(endereco_ip=host, porto=porto)
-        self.rede = TCPSocketCliente(ponto_acesso)
-        self.rede.conectar()
-        self.stub = Stub(self.rede, id_perfil, id_utilizador)
+    def __init__(self, zk_addr, id_perfil, id_utilizador):
+        self.id_perfil      = id_perfil
+        self.id_utilizador  = id_utilizador
+        self._lock          = threading.Lock()
+
+        self.ssl_ctx = criar_ssl_context_cliente()
+
+        # Ligar ao ZooKeeper
+        self.zk = KazooClient(hosts=zk_addr)
+        self.zk.start()
+        self.zk.ensure_path(CHAIN_PATH)
+        print(f"CLIENTE> Ligado ao ZooKeeper em {zk_addr}")
+
+        # Ligações e stubs (inicializados em _atualizar_chain)
+        self._rede_head  = None
+        self._rede_tail  = None
+        self._stub_head  = None
+        self._stub_tail  = None
+        self._head_nome  = None
+        self._tail_nome  = None
+
+        self._atualizar_chain(self.zk.get_children(CHAIN_PATH))
+
+        # Watch para detetar mudanças na cadeia
+        @self.zk.ChildrenWatch(CHAIN_PATH)
+        def _watch(children):
+            with self._lock:
+                self._atualizar_chain(children)
+
+    # ------------------------------------------------------------------
+    # Gestão da cadeia
+    # ------------------------------------------------------------------
+
+    def _criar_ligacao(self, ip, porto):
+        """Cria e estabelece uma ligação SSL a um servidor."""
+        rede = TCPSocketCliente(PontoAcesso(endereco_ip=ip, porto=porto), self.ssl_ctx)
+        rede.conectar()
+        return rede
+
+    def _atualizar_chain(self, children):
+        """Obtém head e tail do ZooKeeper e recria as ligações se necessário."""
+        nos = ordenar_nos(children)
+        if not nos:
+            print("CLIENTE> Nenhum servidor disponível na cadeia.")
+            return
+
+        novo_head = obter_head(nos)
+        novo_tail = obter_tail(nos)
+
+        head_mudou = novo_head != self._head_nome
+        tail_mudou = novo_tail != self._tail_nome
+
+        if not head_mudou and not tail_mudou:
+            return  # cadeia sem alterações relevantes
+
+        print(f"CLIENTE> Cadeia atualizada — head: {novo_head}, tail: {novo_tail}")
+
+        # Fechar ligações antigas (com cuidado para não fechar a mesma duas vezes)
+        if head_mudou and self._rede_head:
+            self._rede_head.fechar_ligacao()
+            self._rede_head = None
+        if tail_mudou and self._rede_tail and self._rede_tail is not self._rede_head:
+            self._rede_tail.fechar_ligacao()
+            self._rede_tail = None
+
+        # Criar nova ligação ao head (se mudou)
+        if head_mudou:
+            dados_head, _ = self.zk.get(f'{CHAIN_PATH}/{novo_head}')
+            h_ip, h_porto = parse_endereco(dados_head)
+            self._rede_head = self._criar_ligacao(h_ip, h_porto)
+            self._stub_head = Stub(self._rede_head, self.id_perfil, self.id_utilizador)
+
+        # Criar nova ligação ao tail (se mudou)
+        if tail_mudou:
+            if novo_tail == novo_head:
+                # Servidor único: head e tail são o mesmo
+                self._rede_tail = self._rede_head
+                self._stub_tail = self._stub_head
+            else:
+                dados_tail, _ = self.zk.get(f'{CHAIN_PATH}/{novo_tail}')
+                t_ip, t_porto = parse_endereco(dados_tail)
+                self._rede_tail = self._criar_ligacao(t_ip, t_porto)
+                self._stub_tail = Stub(self._rede_tail, self.id_perfil, self.id_utilizador)
+
+        self._head_nome = novo_head
+        self._tail_nome = novo_tail
+
+    # ------------------------------------------------------------------
+    # Routing: escrita → head, leitura → tail
+    # ------------------------------------------------------------------
+
+    def _stub(self, cmd):
+        """Devolve o stub correto: head para escritas, tail para leituras."""
+        return self._stub_head if cmd in CMDS_ESCRITA else self._stub_tail
+
+    # ------------------------------------------------------------------
+    # Processamento de comandos
+    # ------------------------------------------------------------------
 
     def processa(self, msg):
         """Recebe uma linha de texto, envia ao servidor via Stub e devolve a resposta formatada."""
@@ -58,20 +169,27 @@ class Processador:
         if not partes:
             return None
 
-        cmd = partes[0].upper()
+        cmd  = partes[0].upper()
         args = partes[1:]
 
+        with self._lock:
+            stub = self._stub(cmd)
+            if stub is None:
+                return "NOK; Sem servidor disponível."
+            return self._executar(cmd, args, stub)
+
+    def _executar(self, cmd, args, stub):
         # ------------------------------------------------------------------
         # Categorias
         # ------------------------------------------------------------------
         if cmd == "CRIA_CATEGORIA":
             if len(args) != 1:
                 return "NOK; Uso: CRIA_CATEGORIA <nome>"
-            op, dados = self.stub.cria_categoria(args[0])
+            op, dados = stub.cria_categoria(args[0])
             return f"OK; Categoria {dados[0].nome} criada com sucesso." if _e_sucesso(op) else _nok(dados)
 
         if cmd == "LISTA_CATEGORIAS":
-            op, dados = self.stub.lista_categorias()
+            op, dados = stub.lista_categorias()
             if not _e_sucesso(op):
                 return _nok(dados)
             categorias, produtos = dados[0], dados[1]
@@ -86,7 +204,7 @@ class Processador:
         if cmd == "REMOVE_CATEGORIA":
             if len(args) != 1:
                 return "NOK; Uso: REMOVE_CATEGORIA <nome>"
-            op, dados = self.stub.remove_categoria(args[0])
+            op, dados = stub.remove_categoria(args[0])
             return f"OK; Categoria {normalizar_nome(args[0])} removida com sucesso." if _e_sucesso(op) else _nok(dados)
 
         # ------------------------------------------------------------------
@@ -96,13 +214,13 @@ class Processador:
             if len(args) != 4:
                 return "NOK; Uso: CRIA_PRODUTO <nome> <categoria> <preco> <quantidade>"
             try:
-                op, dados = self.stub.cria_produto(args[0], args[1], float(args[2]), int(args[3]))
+                op, dados = stub.cria_produto(args[0], args[1], float(args[2]), int(args[3]))
             except ValueError:
                 return "NOK; Preço e quantidade devem ser numéricos."
             return f"OK; Produto {dados[0].nome} criado com sucesso." if _e_sucesso(op) else _nok(dados)
 
         if cmd == "LISTA_PRODUTOS":
-            op, dados = self.stub.lista_produtos()
+            op, dados = stub.lista_produtos()
             if not _e_sucesso(op):
                 return _nok(dados)
             _, produtos = dados[0], dados[1]
@@ -117,7 +235,7 @@ class Processador:
             if len(args) != 2:
                 return "NOK; Uso: AUMENTA_STOCK_PRODUTO <nome> <delta>"
             try:
-                op, dados = self.stub.aumenta_stock(args[0], int(args[1]))
+                op, dados = stub.aumenta_stock(args[0], int(args[1]))
             except ValueError:
                 return "NOK; Delta deve ser inteiro."
             return f"OK; Stock do produto {dados[0].nome} aumentado em {args[1]} unidades com sucesso." if _e_sucesso(op) else _nok(dados)
@@ -126,7 +244,7 @@ class Processador:
             if len(args) != 2:
                 return "NOK; Uso: ATUALIZA_PRECO_PRODUTO <nome> <novo_preco>"
             try:
-                op, dados = self.stub.atualiza_preco(args[0], float(args[1]))
+                op, dados = stub.atualiza_preco(args[0], float(args[1]))
             except ValueError:
                 return "NOK; Preço deve ser numérico."
             return f"OK; O preço do produto {dados[0].nome} foi atualizado para {dados[0].preco:.2f} com sucesso." if _e_sucesso(op) else _nok(dados)
@@ -137,11 +255,11 @@ class Processador:
         if cmd == "CRIA_CLIENTE":
             if len(args) != 3:
                 return "NOK; Uso: CRIA_CLIENTE <nome> <email> <password>"
-            op, dados = self.stub.cria_cliente(args[0], args[1], args[2])
+            op, dados = stub.cria_cliente(args[0], args[1], args[2])
             return f"OK; Cliente criado com sucesso com identificador único {dados[0].id_cliente}." if _e_sucesso(op) else _nok(dados)
 
         if cmd == "LISTA_CLIENTES":
-            op, dados = self.stub.lista_clientes()
+            op, dados = stub.lista_clientes()
             if not _e_sucesso(op):
                 return _nok(dados)
             clientes = dados[0]
@@ -153,13 +271,13 @@ class Processador:
             return "OK; " + "\n".join(linhas)
 
         # ------------------------------------------------------------------
-        # Carrinho (id_cliente vem da sessão, não dos args)
+        # Carrinho
         # ------------------------------------------------------------------
         if cmd == "ADICIONA_PRODUTO_CARRINHO":
             if len(args) != 2:
                 return "NOK; Uso: ADICIONA_PRODUTO_CARRINHO <nome_produto> <quantidade>"
             try:
-                op, dados = self.stub.adiciona_produto_carrinho(args[0], int(args[1]))
+                op, dados = stub.adiciona_produto_carrinho(args[0], int(args[1]))
             except ValueError:
                 return "NOK; Quantidade deve ser inteira."
             return f"OK; Produto {dados[0].nome} adicionado com sucesso ao carrinho." if _e_sucesso(op) else _nok(dados)
@@ -167,11 +285,11 @@ class Processador:
         if cmd == "REMOVE_PRODUTO_CARRINHO":
             if len(args) != 1:
                 return "NOK; Uso: REMOVE_PRODUTO_CARRINHO <nome_produto>"
-            op, dados = self.stub.remove_produto_carrinho(args[0])
+            op, dados = stub.remove_produto_carrinho(args[0])
             return f"OK; Produto {dados[0].nome} removido com sucesso do carrinho de compras." if _e_sucesso(op) else _nok(dados)
 
         if cmd == "LISTA_CARRINHO":
-            op, dados = self.stub.lista_carrinho()
+            op, dados = stub.lista_carrinho()
             if not _e_sucesso(op):
                 return _nok(dados)
             _, produtos = dados[0], dados[1]
@@ -188,7 +306,7 @@ class Processador:
             return "OK; " + "\n".join(linhas)
 
         if cmd == "CHECKOUT_CARRINHO":
-            op, dados = self.stub.checkout_carrinho()
+            op, dados = stub.checkout_carrinho()
             return ("OK; Checkout de carrinho de compras efetuado com sucesso. "
                     "Encomenda criada com sucesso a partir do carrinho.") if _e_sucesso(op) else _nok(dados)
 
@@ -199,7 +317,7 @@ class Processador:
             if len(args) != 1:
                 return "NOK; Uso: LISTA_ENCOMENDAS <id_cliente>"
             try:
-                op, dados = self.stub.lista_encomendas(int(args[0]))
+                op, dados = stub.lista_encomendas(int(args[0]))
             except ValueError:
                 return "NOK; id_cliente deve ser inteiro."
             if not _e_sucesso(op):
@@ -207,19 +325,18 @@ class Processador:
             cliente, encomendas, prods_por_encomenda = dados[0], dados[1], dados[2]
             if not encomendas:
                 return "OK; Sem Encomendas"
-            produtos_distintos = set()
-            for enc in encomendas:
-                produtos_distintos.update(enc.produtos.keys())
             contagem = {}
+            total_quantidade_geral = 0
             for i, enc in enumerate(encomendas):
                 for p in prods_por_encomenda[i]:
                     contagem[p.categoria] = contagem.get(p.categoria, 0) + p.quantidade
-            max_q = max(contagem.values())
+                    total_quantidade_geral += p.quantidade
+            max_q   = max(contagem.values())
             cat_top = ", ".join(sorted(c for c, q in contagem.items() if q == max_q))
-            linhas = [
+            linhas  = [
                 f"Cliente: {cliente.nome} {cliente.email}",
                 f"Total Encomendas: {len(encomendas)}",
-                f"Total Produtos: {len(produtos_distintos)}",
+                f"Total Produtos: {total_quantidade_geral}",
                 f"Total Preço: {round(sum(e.total_preco for e in encomendas), 2):.2f} euros",
                 f"Categoria Top: {cat_top}",
                 "-" * 74,
@@ -240,5 +357,10 @@ class Processador:
         return f"NOK; Comando desconhecido: {cmd}"
 
     def close(self):
-        """Fecha a ligação ao servidor."""
-        self.rede.fechar_ligacao()
+        """Fecha as ligações ao servidor e ao ZooKeeper."""
+        with self._lock:
+            if self._rede_head:
+                self._rede_head.fechar_ligacao()
+            if self._rede_tail and self._rede_tail is not self._rede_head:
+                self._rede_tail.fechar_ligacao()
+        self.zk.stop()
