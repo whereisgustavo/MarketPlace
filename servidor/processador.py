@@ -240,16 +240,15 @@ class Processador:
             return "Sem Encomendas"
 
         total_gasto = sum(enc.total_preco for enc in encomendas)
-        produtos_distintos = set()
-        for enc in encomendas:
-            produtos_distintos.update(enc.produtos.keys())
 
-        # Calcula a categoria top global (todas as encomendas do cliente)
+        # Calcula a categoria top global e total de unidades encomendadas
         contagem = {}
+        total_quantidade_geral = 0
         for enc in encomendas:
             for p_id, qtd in enc.produtos.items():
                 cat = self.loja._produtos[p_id].categoria
                 contagem[cat] = contagem.get(cat, 0) + qtd
+                total_quantidade_geral += qtd
         max_q = max(contagem.values())
         tops = sorted([c for c, q in contagem.items() if q == max_q])
         cat_top_str = ", ".join(tops)
@@ -257,7 +256,7 @@ class Processador:
         linhas = []
         linhas.append(f"Cliente: {cliente.nome} {cliente.email}")
         linhas.append(f"Total Encomendas: {len(encomendas)}")
-        linhas.append(f"Total Produtos: {len(produtos_distintos)}")
+        linhas.append(f"Total Produtos: {total_quantidade_geral}")
         linhas.append(f"Total Preço: {round(total_gasto, 2):.2f} euros")
         linhas.append(f"Categoria Top: {cat_top_str}")
         linhas.append("-" * 74)

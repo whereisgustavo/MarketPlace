@@ -249,6 +249,7 @@ def main():
             servidor.fechar_ligacao(s)
     servidor.fechar_servidor()
     zk.stop()
+    zk.close()
     print("SERVIDOR> Terminado.")
 
 

@@ -176,7 +176,12 @@ class Processador:
             stub = self._stub(cmd)
             if stub is None:
                 return "NOK; Sem servidor disponível."
-            return self._executar(cmd, args, stub)
+            try:
+                return self._executar(cmd, args, stub)
+            except TypeError:
+                return "NOK; Ligação perdida ao servidor. Tente novamente."
+            except Exception as e:
+                return f"NOK; Erro inesperado: {e}"
 
     def _executar(self, cmd, args, stub):
         # ------------------------------------------------------------------
@@ -364,3 +369,4 @@ class Processador:
             if self._rede_tail and self._rede_tail is not self._rede_head:
                 self._rede_tail.fechar_ligacao()
         self.zk.stop()
+        self.zk.close()
